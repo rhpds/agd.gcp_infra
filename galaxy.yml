@@ -1,0 +1,21 @@
+---
+namespace: agd
+name: gcp_infra
+version: 1.0.0
+readme: README.md
+authors:
+- Mitesh Sharma <mitsharm@redhat.com>
+description: Agnosticd GCP infra collection
+license:
+- GPL-2.0-or-later
+license_file: ''
+tags:
+  - agd
+  - gcp_infra
+dependencies: {}
+repository: http://example.com/repository
+documentation: http://docs.example.com
+homepage: http://example.com
+issues: http://example.com/issue/tracker
+build_ignore: []
+
