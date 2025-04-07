@@ -7,20 +7,21 @@
 # SKIP if key exists locally
 
 - name: Set infra_ssh_key
-  set_fact:
+  ansible.builtin.set_fact:
     infra_ssh_key: "{{ env_authorized_key_path }}"
 
 - name: Stat infra ssh key
-  stat:
+  ansible.builtin.stat:
     path: "{{ infra_ssh_key }}"
   register: stat_infra_ssh_key
 
 - name: Stat ssh key
-  stat:
+  ansible.builtin.stat:
     path: "{{ env_authorized_key_path }}"
   register: stat_ssh_key
 
-- when: not stat_ssh_key.stat.exists
+- name: SSH key block
+  when: not stat_ssh_key.stat.exists
   block:
     - name: Retrieve SSH Key from secrets
       environment:
@@ -29,7 +30,7 @@
         CLOUDSDK_COMPUTE_REGION: "{{ gcp_region }}"
         CLOUDSDK_CONFIG: "{{ output_dir }}/.gcloud-{{ guid }}"
         CLOUDSDK_CORE_PROJECT: "{{ gcp_project_id }}"
-      command: >
+      ansible.builtin.command: >
           gcloud secrets versions access latest
           --secret="{{ project_tag }}-bastion-ssh-secret"
       register: r_ssh_key
@@ -38,7 +39,7 @@
         - ("NOT_FOUND" not in r_ssh_key.stderr)
 
     - name: Create the SSH key locally
-      copy:
+      ansible.builtin.copy:
         dest: "{{ env_authorized_key_path }}"
         mode: 0400
         content: "{{ r_ssh_key.stdout }}\n"
@@ -47,7 +48,7 @@
         - r_ssh_key.rc == 0
 
     - name: Generate SSH pub key
-      shell: ssh-keygen -y -f "{{ env_authorized_key_path }}" > "{{ env_authorized_key_path_pub }}"
+      ansible.builtin.shell: ssh-keygen -y -f "{{ env_authorized_key_path }}" > "{{ env_authorized_key_path_pub }}"
       args:
         creates: "{{ env_authorized_key_path_pub }}"
       when:
@@ -63,7 +64,7 @@
         CLOUDSDK_COMPUTE_REGION: "{{ gcp_region }}"
         CLOUDSDK_CONFIG: "{{ output_dir }}/.gcloud-{{ guid }}"
         CLOUDSDK_CORE_PROJECT: "{{ gcp_project_id }}"
-      command: >
+      ansible.builtin.command: >
           gcloud secrets create "{{ project_tag }}-bastion-ssh-secret"
           --replication-policy="user-managed"
           --locations="{{gcp_region}}"

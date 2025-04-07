@@ -1,8 +1,7 @@
 ---
 - name: Debug vars
   ansible.builtin.debug:
-    msg:
-    - "gcp_credentials: ({{ gcp_credentials }})"
+    msg: "gcp_credentials: ({{ gcp_credentials }})"
 
 - name: Load GCP credentials into string
   ansible.builtin.set_fact:
@@ -10,8 +9,8 @@
 
 - name: Check if email is Red Hat associate
   when:
-  - '"@redhat.com" in requester_email'
-  - agnosticd_open_environment | default(false) | bool
+    - '"@redhat.com" in requester_email'
+    - agnosticd_open_environment | default(false) | bool
   ansible.builtin.set_fact:
     internal_user: true
 
@@ -87,13 +86,13 @@
 - name: Debug vars
   ansible.builtin.debug:
     msg:
-    - "gcp_creds: {{ gcp_creds }}"
-    - "service_account_email: {{ service_account_email }}"
-    - "guid: {{ guid }}"
-    - "gcp_creds.project_id: {{ gcp_creds.project_id }}"
-    - "new_service_account: {{ new_service_account }}"
-    - "svc_account_creds_file: {{ svc_account_creds_file }}"
-    - "project: {{ gcp_creds.project_id }}"
+      - "gcp_creds: {{ gcp_creds }}"
+      - "service_account_email: {{ service_account_email }}"
+      - "guid: {{ guid }}"
+      - "gcp_creds.project_id: {{ gcp_creds.project_id }}"
+      - "new_service_account: {{ new_service_account }}"
+      - "svc_account_creds_file: {{ svc_account_creds_file }}"
+      - "project: {{ gcp_creds.project_id }}"
 
 - name: Create a service account key for OPEN Environment
   google.cloud.gcp_iam_service_account_key:
@@ -136,8 +135,8 @@
 
 - name: Add user, service account, and admin group to members
   when:
-  - internal_user | default(false) | bool
-  - user_to_add is defined
+    - internal_user | default(false) | bool
+    - user_to_add is defined
   ansible.builtin.set_fact:
     new_members: "{{ new_members | union([user_to_add]) }}"
 
@@ -185,17 +184,17 @@
     project: "{{ project_name }}"
     state: present
   loop:
-  - cloudresourcemanager
-  - compute
-  - deploymentmanager
-  - dns
-  - iam
-  - iamcredentials
-  - oslogin
-  - secretmanager
-  - servicemanagement
-  - serviceusage
-  - storage
+    - cloudresourcemanager
+    - compute
+    - deploymentmanager
+    - dns
+    - iam
+    - iamcredentials
+    - oslogin
+    - secretmanager
+    - servicemanagement
+    - serviceusage
+    - storage
 
 - name: Create managed DNS zone for OPEN Environment
   google.cloud.gcp_dns_managed_zone:
@@ -226,8 +225,8 @@
     type: NS
     ttl: 600
     target:
-    - "{{ new_zone.nameServers[0] }}"
-    - "{{ new_zone.nameServers[1] }}"
-    - "{{ new_zone.nameServers[2] }}"
-    - "{{ new_zone.nameServers[3] }}"
+      - "{{ new_zone.nameServers[0] }}"
+      - "{{ new_zone.nameServers[1] }}"
+      - "{{ new_zone.nameServers[2] }}"
+      - "{{ new_zone.nameServers[3] }}"
     state: present

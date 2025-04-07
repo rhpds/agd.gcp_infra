@@ -1,6 +1,6 @@
 ---
 # Setting the stack_tag
-- set_fact:
+- ansible.builtin.set_fact:
     stack_tag: "{{env_type | replace('-', '_')}}_{{guid}}"
   tags:
     - create_inventory
@@ -13,16 +13,20 @@
     CLOUDSDK_COMPUTE_REGION: "{{ gcp_region }}"
     CLOUDSDK_CONFIG: "{{ output_dir }}/.gcloud-{{ guid }}"
     CLOUDSDK_CORE_PROJECT: "{{ gcp_project_id }}"
-  command: "gcloud compute instances list --filter=\"name~'^{{ project_tag }}-vm$'\" --format json"
+  # ansible.builtin.command: "gcloud compute instances list --filter=\"name~'^{{ project_tag }}-vm$'\" --format json"
+  ansible.builtin.command: >-
+    gcloud compute instances list
+    --filter="labels.ansiblegroup=bastions"
+    --format json
   register: r_vm_info
 
 - block:
     - name: Get Zone
-      set_fact:
+      ansible.builtin.set_fact:
         gcp_zone: "{{ r_vm_info.stdout | from_json | first | json_query('zone') | regex_replace('^.*zones\/', '') }}"
 
     - name: Get list of VMs
-      gcp_compute_instance_info:
+      google.cloud.gcp_compute_instance_info:
         auth_kind: "{{ gcp_auth_type }}"
         project: "{{ gcp_project_id }}"
         service_account_file: "{{ gcp_credentials_file }}"
@@ -36,7 +40,7 @@
         - must
 
     - name: Build inventory
-      add_host:
+      ansible.builtin.add_host:
         name: "{{item.name}}"
         shortname: "{{item.tags.Name|default(item.name)}}"
         groups:
@@ -70,7 +74,7 @@
         - create_inventory
         - must
 
-    - add_host:
+    - ansible.builtin.add_host:
         name: "{{item.name}}"
         groups: "{{item.labels['ansiblegroup']}}"
       with_items: "{{instance_list.resources}}"
